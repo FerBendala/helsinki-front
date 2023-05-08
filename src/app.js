@@ -5,16 +5,20 @@ import FormAddBlog from './components/form-add_blog'
 import Blog from './components/blog'
 import Notification from './components/notification'
 import Footer from './components/footer'
+import Toggable from './components/toggable'
 
 import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
-    const [errorMessage, setErrorMessage] = useState( null )
+    const [alertMessage, setAlertMessage] = useState( null )
+    const [alertClassName, setAlertClassName] = useState( null )
     const [blogs, setBlogs] = useState( [] )
     const [newBlog, setNewBlog] = useState( {} )
     const [user, setUser] = useState( null )
 
+
+    // blogs-app api call
     useEffect( () => {
         blogService
             .getAll()
@@ -23,17 +27,32 @@ const App = () => {
             } )
     }, [] )
 
+    // save logged user into localstorage
+    useEffect( () => {
+        const loggedUser = window.localStorage.getItem( 'User' )
+        if ( loggedUser ) {
+            const user = JSON.parse( loggedUser )
+            setUser( user )
+            blogService.setToken( user.token )
+        }
+    }, [] )
+
     const handleAddBlog = ( newBlog ) => {
         blogService
             .create( newBlog )
             .then( returnedBlog => {
                 setBlogs( blogs.concat( returnedBlog ) )
-                setNewBlog( {} )
+
+                setAlertMessage( `a new blog ${returnedBlog.title} by ${returnedBlog.author} added.` )
+                setAlertClassName( 'success' )
             } )
-            .catch( ( { response } ) => {
-                setErrorMessage( response.statusText )
+            .catch( () => {
+                setAlertMessage( 'There was an error creating your blog' )
+                setAlertClassName( 'error' )
+            } )
+            .finally( () => {
                 setTimeout( () => {
-                    setErrorMessage( null )
+                    setAlertMessage( null )
                 }, 5000 )
             } )
     }
@@ -43,14 +62,29 @@ const App = () => {
             .login( response )
             .then( ( validUser ) => {
                 setUser( validUser )
+                window.localStorage.setItem( 'User', JSON.stringify( validUser ) )
+
+                // Set the token for the user to be able to manage their own posts
                 blogService.setToken( validUser.token )
+
+                // hello user
+                setAlertMessage( `Hello ${validUser.username}! Nice to have you here` )
+                setAlertClassName( 'success' )
             } )
             .catch( ( { response } ) => {
-                setErrorMessage( response.statusText )
+                setAlertMessage( 'Wrong username or password' )
+                setAlertClassName( 'error' )
+            } )
+            .finally( () => {
                 setTimeout( () => {
-                    setErrorMessage( null )
+                    setAlertMessage( null )
                 }, 5000 )
             } )
+    }
+
+    const handleLogout = () => {
+        window.localStorage.removeItem( 'User' )
+        window.location.reload()
     }
 
     return (
@@ -59,21 +93,29 @@ const App = () => {
             <h1>Blogs</h1>
 
             {/* Notifications if error succeeds */}
-            <Notification message={errorMessage} />
+            <Notification message={alertMessage} classname={alertClassName} />
 
             {/* Login */}
-            {user === null
-                ? <FormLogin setLogin={handleLogin} />
-                : <>
-                    <p>{user.name} logged-in</p>
-                    <FormAddBlog
-                        setBlog={handleAddBlog}
-                        newBlog={newBlog}
-                        setNewBlog={setNewBlog}
-                        userId={user}
-                    />
-                </>
+            {user === null &&
+                <Toggable buttonLabel='login'>
+                    <FormLogin setLogin={handleLogin} />
+                </Toggable>
             }
+            {user !== null && <>
+                <p>
+                    <span>{user.name} logged-in </span>
+                    <button onClick={handleLogout}>Logout</button>
+                </p>
+                <Toggable buttonLabel='new blog'>
+                    <FormAddBlog
+                        addBlog={handleAddBlog}
+                        newBlog={newBlog}
+                    />
+                </Toggable>
+            </>}
+
+            <br />
+            <br />
 
             {/* Blogs list */}
             <ul>

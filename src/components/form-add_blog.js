@@ -1,13 +1,16 @@
-const FormAddBlog = ( { setBlog, newBlog, setNewBlog, userId } ) => {
+import { useState } from 'react'
+
+const FormAddBlog = ( { addBlog, newBlog } ) => {
+    const [value, setValue] = useState( {} )
     const formData = [
         { id: 'title', type: 'text', name: 'Title' },
         { id: 'author', type: 'text', name: 'Author' },
         { id: 'url', type: 'url', name: 'Url' },
         { id: 'likes', type: 'number', name: 'Likes' },
     ]
-    
+
     const handleInputChange = ( { target } ) => {
-        setNewBlog( {
+        setValue( {
             ...newBlog,
             [target.id]: target.value
         } )
@@ -15,9 +18,10 @@ const FormAddBlog = ( { setBlog, newBlog, setNewBlog, userId } ) => {
 
     const handleSetBlog = async ( event ) => {
         event.preventDefault()
-        setBlog( newBlog )
+        addBlog( newBlog )
+        setValue( {} )
     }
-
+    console.log( newBlog )
     return (
         <form onSubmit={handleSetBlog}>
             <fieldset>
@@ -32,7 +36,7 @@ const FormAddBlog = ( { setBlog, newBlog, setNewBlog, userId } ) => {
                             <input
                                 id={id}
                                 type={type}
-                                value={newBlog[id]}
+                                value={value[id]}
                                 onChange={handleInputChange}
                             />
                         </label>

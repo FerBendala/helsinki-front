@@ -12,6 +12,8 @@ ul {
     padding: 0;
 
     & li {
+        display: grid;
+        grid-template-columns: minmax(0, 4.5em) minmax(0, 1fr);
         padding: 1em;
         margin-bottom: 1em;
         border-radius: 0.5em;
@@ -20,13 +22,18 @@ ul {
         & b {
             display: inline-block;
             min-width: 4em;
+            padding-right: 0.5em;
+
+            text-align: right;
+
+            &::after {
+                content: ':';
+            }
         }
     }
 }
 
 form {
-    margin-bottom: 2em;
-
     & fieldset {
         padding: 1.5em 2em;
     }
@@ -49,15 +56,21 @@ footer {
     font-size: 0.64em;
 }
 
-.error {
+.notification {
     padding: 1em;
     margin-bottom: 1em;
     border-radius: 0.5em;
     border-style: solid;
 
-
-    color: red;
     background: lightgrey;
 
     font-size: 1em;
+
+    &.error {
+        color: red;
+    }
+
+    &.success {
+        color: green;
+    }
 }
