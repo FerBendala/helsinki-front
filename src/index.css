@@ -8,28 +8,14 @@ h1 {
 }
 
 ul {
-    margin: 0 0 2em;
+    list-style: none;
     padding: 0;
+    margin: 32px 0;
 
     & li {
-        display: grid;
-        grid-template-columns: minmax(0, 4.5em) minmax(0, 1fr);
-        padding: 1em;
-        margin-bottom: 1em;
-        border-radius: 0.5em;
-        border: solid 0.05em black;
-
-        & b {
-            display: inline-block;
-            min-width: 4em;
-            padding-right: 0.5em;
-
-            text-align: right;
-
-            &::after {
-                content: ':';
-            }
-        }
+        padding-bottom: 16px;
+        margin-bottom: 8px;
+        border-bottom: solid 1px black;
     }
 }
 

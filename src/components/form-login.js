@@ -32,7 +32,7 @@ const FormLogin = ( { setLogin } ) => {
                     />
                 </label>
                 <button type='submit'>login</button>
-            </fieldset >
+            </fieldset>
         </form>
     )
 }

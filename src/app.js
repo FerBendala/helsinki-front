@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import FormLogin from './components/form-login'
 import FormAddBlog from './components/form-add_blog'
 import Blog from './components/blog'
-import Notification from './components/notification'
+import Alert from './components/alert'
 import Footer from './components/footer'
-import Toggable from './components/toggable'
+import Togglable from './components/togglable'
 
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -14,8 +14,11 @@ const App = () => {
     const [alertMessage, setAlertMessage] = useState( null )
     const [alertClassName, setAlertClassName] = useState( null )
     const [blogs, setBlogs] = useState( [] )
-    const [newBlog, setNewBlog] = useState( {} )
     const [user, setUser] = useState( null )
+
+    const blogFormRef = useRef()
+
+    const sortedBlogs = blogs.sort( ( a, b ) => b.likes - a.likes );
 
 
     // blogs-app api call
@@ -37,49 +40,106 @@ const App = () => {
         }
     }, [] )
 
-    const handleAddBlog = ( newBlog ) => {
-        blogService
-            .create( newBlog )
-            .then( returnedBlog => {
-                setBlogs( blogs.concat( returnedBlog ) )
-
-                setAlertMessage( `a new blog ${returnedBlog.title} by ${returnedBlog.author} added.` )
-                setAlertClassName( 'success' )
-            } )
-            .catch( () => {
-                setAlertMessage( 'There was an error creating your blog' )
-                setAlertClassName( 'error' )
-            } )
-            .finally( () => {
-                setTimeout( () => {
-                    setAlertMessage( null )
-                }, 5000 )
-            } )
+    const alert = ( { text, classname } ) => {
+        setAlertMessage( text )
+        setAlertClassName( classname )
+        setTimeout( () => {
+            setAlertMessage( null )
+        }, 5000 )
     }
 
-    const handleLogin = ( response ) => {
+    const login = ( user ) => {
         loginService
-            .login( response )
-            .then( ( validUser ) => {
+            .login( user )
+            .then( validUser => {
+                // Set user session
                 setUser( validUser )
                 window.localStorage.setItem( 'User', JSON.stringify( validUser ) )
 
                 // Set the token for the user to be able to manage their own posts
                 blogService.setToken( validUser.token )
+                alert( {
+                    text: `Hello ${validUser.username}! Nice to have you here`,
+                    classname: 'success'
+                } )
+            } )
+            .catch( () => {
+                alert( {
+                    text: 'Wrong username or password',
+                    classname: 'error'
+                } )
+            } )
+    }
 
-                // hello user
-                setAlertMessage( `Hello ${validUser.username}! Nice to have you here` )
-                setAlertClassName( 'success' )
+    const createBlog = ( newBlog ) => {
+        blogFormRef.current.toggleVisibility()
+        blogService
+            .create( newBlog )
+            .then( returnedBlog => {
+                setBlogs( blogs.concat( returnedBlog ) )
+                alert( {
+                    text: `a new blog ${returnedBlog.title} by ${returnedBlog.author} added.`,
+                    classname: 'success'
+                } )
             } )
-            .catch( ( { response } ) => {
-                setAlertMessage( 'Wrong username or password' )
-                setAlertClassName( 'error' )
+            .catch( () => {
+                alert( {
+                    text: 'There was an error creating your blog.',
+                    classname: 'error'
+                } )
             } )
-            .finally( () => {
-                setTimeout( () => {
-                    setAlertMessage( null )
-                }, 5000 )
+    }
+
+    const updateBlog = ( updatedBlog ) => {
+        const { id, user } = updatedBlog
+
+        blogService
+            .update( id, updatedBlog, user.id )
+            .then( returnedBlog => {
+                setBlogs( prevBlogs =>
+                    prevBlogs.map( ( blog ) =>
+                        blog.id === returnedBlog.id ? returnedBlog : blog
+                    )
+                )
+                alert( {
+                    text: `${returnedBlog.title} by ${returnedBlog.author} updated.`,
+                    classname: 'success'
+                } )
             } )
+            .catch( () => {
+                alert( {
+                    text: 'There was an error updating your blog.',
+                    classname: 'error'
+                } )
+            } )
+    }
+
+    const removeBlog = ( removedBlog ) => {
+        const { id, title, author, user } = removedBlog
+        const userId = user.id === undefined
+            ? user
+            : user.id
+
+        if ( window.confirm( `Remove blog ${title} by ${author}` ) ) {
+            blogService
+                .remove( id, userId )
+                .then( () => {
+                    const { id } = removedBlog
+                    const filteredBlogs = blogs.filter( blog => blog.id !== id && blog )
+
+                    setBlogs( filteredBlogs )
+                    alert( {
+                        text: 'The blog was removed.',
+                        classname: 'success'
+                    } )
+                } )
+                .catch( () => {
+                    alert( {
+                        text: 'There was an error removing your blog.',
+                        classname: 'error'
+                    } )
+                } )
+        }
     }
 
     const handleLogout = () => {
@@ -87,42 +147,45 @@ const App = () => {
         window.location.reload()
     }
 
+
     return (
         <div>
             {/* Header */}
             <h1>Blogs</h1>
 
-            {/* Notifications if error succeeds */}
-            <Notification message={alertMessage} classname={alertClassName} />
+            {/* Alert if error succeeds */}
+            <Alert
+                message={alertMessage}
+                classname={alertClassName}
+            />
 
             {/* Login */}
             {user === null &&
-                <Toggable buttonLabel='login'>
-                    <FormLogin setLogin={handleLogin} />
-                </Toggable>
+                <Togglable buttonLabel='login'>
+                    <FormLogin setLogin={login} />
+                </Togglable>
             }
             {user !== null && <>
                 <p>
                     <span>{user.name} logged-in </span>
                     <button onClick={handleLogout}>Logout</button>
                 </p>
-                <Toggable buttonLabel='new blog'>
-                    <FormAddBlog
-                        addBlog={handleAddBlog}
-                        newBlog={newBlog}
-                    />
-                </Toggable>
+                <Togglable
+                    buttonLabel='new blog'
+                    ref={blogFormRef}
+                >
+                    <FormAddBlog createBlog={createBlog} />
+                </Togglable>
             </>}
 
-            <br />
-            <br />
-
-            {/* Blogs list */}
+            {/* Sorted blogs list */}
             <ul>
-                {blogs.map( blog =>
+                {sortedBlogs.map( blog =>
                     <Blog
                         key={blog.id}
                         blog={blog}
+                        updateBlog={updateBlog}
+                        removeBlog={removeBlog}
                     />
                 )}
             </ul>
