@@ -18,7 +18,7 @@ const App = () => {
 
     const blogFormRef = useRef()
 
-    const sortedBlogs = blogs.sort( ( a, b ) => b.likes - a.likes );
+    const sortedBlogs = blogs.sort( ( a, b ) => b.likes - a.likes )
 
 
     // blogs-app api call
