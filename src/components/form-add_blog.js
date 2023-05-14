@@ -23,7 +23,10 @@ const FormAddBlog = ( { createBlog } ) => {
     }
 
     return (
-        <form onSubmit={handleSetBlog}>
+        <form
+            onSubmit={handleSetBlog}
+            className='form-add_blog'
+        >
             <fieldset>
                 <legend>Add new blog</legend>
                 {
