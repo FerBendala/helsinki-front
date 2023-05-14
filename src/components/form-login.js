@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const FormLogin = ( { setLogin } ) => {
     const [username, setUsername] = useState( 'ferbendala' )
@@ -35,6 +36,10 @@ const FormLogin = ( { setLogin } ) => {
             </fieldset>
         </form>
     )
+}
+
+FormLogin.propTypes = {
+    setLogin: PropTypes.func.isRequired
 }
 
 export default FormLogin
