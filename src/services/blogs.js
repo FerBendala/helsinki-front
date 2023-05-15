@@ -21,25 +21,14 @@ const create = async newObject => {
     return request.then( response => response.data )
 }
 
-const update = async ( objectId, newObject, userId ) => {
-    const config = {
-        headers: {
-            Authorization: token,
-            'User-Id': userId,
-        }
-    }
-
+const update = async ( objectId, newObject ) => {
+    const config = { headers: { Authorization: token } }
     const request = axios.put( `${baseUrl}/${objectId}`, newObject, config )
     return request.then( response => response.data )
 }
 
-const remove = async ( objectId, userId ) => {
-    const config = {
-        headers: {
-            Authorization: token,
-            'User-Id': userId,
-        }
-    }
+const remove = async ( objectId ) => {
+    const config = { headers: { Authorization: token } }
 
     const request = axios.delete( `${baseUrl}/${objectId}`, config )
     return request.then( response => response.data )

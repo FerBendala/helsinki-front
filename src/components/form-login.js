@@ -2,8 +2,8 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 
 const FormLogin = ( { setLogin } ) => {
-    const [username, setUsername] = useState( 'ferbendala' )
-    const [password, setPassword] = useState( 'fernandobendala1990' )
+    const [username, setUsername] = useState( '' )
+    const [password, setPassword] = useState( '' )
 
     const handleLogin = ( event ) => {
         event.preventDefault()
@@ -17,22 +17,29 @@ const FormLogin = ( { setLogin } ) => {
                 <label htmlFor='username'>
                     <span>username</span>
                     <input
+                        id='username'
+                        name='username'
                         type='text'
                         value={username}
-                        name='username'
                         onChange={( { target } ) => setUsername( target.value )}
                     />
                 </label>
                 <label htmlFor='password'>
                     <span>password</span>
                     <input
+                        id='password'
+                        name='password'
                         type='password'
                         value={password}
-                        name='password'
                         onChange={( { target } ) => setPassword( target.value )}
                     />
                 </label>
-                <button type='submit'>login</button>
+                <button
+                    id='button-submit'
+                    type='submit'
+                >
+                    login
+                </button>
             </fieldset>
         </form>
     )

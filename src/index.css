@@ -52,11 +52,14 @@ footer {
 
     font-size: 1em;
 
-    &.error {
-        color: red;
-    }
+}
 
-    &.success {
-        color: green;
-    }
+.error {
+    color: red;
+    border-color: red;
+}
+
+.success {
+    color: green;
+    border-color: green;
 }

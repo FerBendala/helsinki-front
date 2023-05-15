@@ -91,10 +91,10 @@ const App = () => {
     }
 
     const updateBlog = ( updatedBlog ) => {
-        const { id, user } = updatedBlog
+        const { id } = updatedBlog
 
         blogService
-            .update( id, updatedBlog, user.id )
+            .update( id, updatedBlog )
             .then( returnedBlog => {
                 setBlogs( prevBlogs =>
                     prevBlogs.map( ( blog ) =>
@@ -115,14 +115,11 @@ const App = () => {
     }
 
     const removeBlog = ( removedBlog ) => {
-        const { id, title, author, user } = removedBlog
-        const userId = user.id === undefined
-            ? user
-            : user.id
+        const { id, title, author } = removedBlog
 
         if ( window.confirm( `Remove blog ${title} by ${author}` ) ) {
             blogService
-                .remove( id, userId )
+                .remove( id )
                 .then( () => {
                     const { id } = removedBlog
                     const filteredBlogs = blogs.filter( blog => blog.id !== id && blog )

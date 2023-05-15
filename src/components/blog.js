@@ -17,7 +17,7 @@ const Blog = ( { blog, updateBlog, removeBlog } ) => {
     }
 
     return (
-        <li>
+        <li className='blog'>
             <h3>{blog.title}</h3>
             <Togglable buttonLabel='view'>
                 <p>
